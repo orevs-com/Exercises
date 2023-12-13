@@ -104,17 +104,18 @@ generate_and_print_matrix(grouped_by_indicator,
 
 # Function to plot line graphs
 
-
+    
 def plot_line_graphs(df, selected_years, title):
     """
     Plot line graphs for each country over the selected years.
-    """
+    """    
     plt.figure(figsize=(10, 6))
     sns.set(style="white")  # Set grid style to white
 
     for country in df.index:
-        plt.plot(df.columns, df.loc[country].astype(
-            float), marker='o', label=country)
+        # Convert to float, excluding non-numeric values
+        numeric_values = pd.to_numeric(df.loc[country], errors='coerce')
+        plt.plot(df.columns, numeric_values, marker='o', label=country)
 
     plt.title(title)
     plt.xlabel("Year")
@@ -129,7 +130,7 @@ def plot_grouped_bar_chart(df, selected_years, title, ylabel):
     Plot grouped bar chart for selected years.
     """
     plt.figure(figsize=(12, 6))
-    sns.set(style="white")  # Set grid style for better visualization
+    sns.set(style="white")  # Set grid style to white
 
     numeric_columns = df.columns[df.columns.isin(selected_years)]
 
@@ -201,11 +202,14 @@ population_total = grouped_by_indicator.get_group('Population, total')
 gov_effectiveness = grouped_by_indicator.get_group(
     'Government Effectiveness: Estimate')
 net_migration = grouped_by_indicator.get_group('Net migration')
+ghg_emissions = grouped_by_indicator.get_group(
+    'Total greenhouse gas emissions (kt of CO2 equivalent)')
 
 # Exclude the 'Indicators' column
 population_total = population_total.drop(columns='Indicators')
 gov_effectiveness = gov_effectiveness.drop(columns='Indicators')
 net_migration = net_migration.drop(columns='Indicators')
+ghg_emissions = ghg_emissions.drop(columns='Indicators')
 
 # Plot line graphs
 plot_line_graphs(population_total, selected_years_line_plot,
@@ -214,6 +218,8 @@ plot_line_graphs(gov_effectiveness, selected_years_line_plot,
                  "Line Graph for Government Effectiveness: Estimate (2011-2021)")
 plot_line_graphs(net_migration, selected_years_line_plot,
                  "Line Graph for Net migration (2011-2021)")
+plot_line_graphs(ghg_emissions, selected_years_line_plot, 
+                 "Line Graph for Total Greenhouse Gas Emissions (kt of CO2 equivalent) (2011-2021)")
 
 # Select years for bar plot
 selected_years_bar_plot = ['2011', '2013', '2015', '2017', '2019']
@@ -238,17 +244,21 @@ plot_grouped_bar_chart(forest_area_percentage, selected_years_bar_plot,
                        "Forest Area by Country for Selected Years", 
                        "Forest Area (% of Land Area)")
 
+# Select Countries to plot Heatmap
 selected_country_1 = 'India'
 selected_country_2 = 'South Africa'
 selected_country_3 = 'Nigeria'
 selected_country_4 = 'United States'
+selected_country_5 = 'China'
 
+# Select Indicators for the Heatmap
 selected_indicators = ['Forest area (% of land area)', 'Forest area (sq. km)', 
                        'Population density (people per sq. km of land area)',
                        'Government Effectiveness: Estimate', 'Net migration',
                        'Population, total',
                        'Total greenhouse gas emissions (kt of CO2 equivalent)']
 
+# Plot the HeatMap
 generate_correlation_heatmap(
     df_stat_cleaned, selected_country_1, selected_indicators)
 generate_correlation_heatmap(
@@ -257,3 +267,5 @@ generate_correlation_heatmap(
     df_stat_cleaned, selected_country_3, selected_indicators)
 generate_correlation_heatmap(
     df_stat_cleaned, selected_country_4, selected_indicators)
+generate_correlation_heatmap(
+    df_stat_cleaned, selected_country_5, selected_indicators)
